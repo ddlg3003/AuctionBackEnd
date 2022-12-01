@@ -8,7 +8,7 @@
     "dev": "SET NODE_ENV=DEVELOPMENT& nodemon src/server",
     "prod": "SET NODE_ENV=PRODUCTION& nodemon src/server",
     "seeder": "node src/utils/seeder.js",
-    "heroku-postbuild" : "NPM_CONFIG_PRODUCTION=false && npm install --prefix frontend && npm run build --prefix frontend"
+    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false && npm install --prefix frontend && npm run build --prefix frontend"
   },
   "author": "Ghulam Abbas",
   "license": "ISC",
@@ -27,6 +27,6 @@
     "validator": "^13.1.17"
   },
   "devDependencies": {
-    "nodemon": "^2.0.6"
+    "nodemon": "^2.0.20"
   }
 }

@@ -17,8 +17,8 @@ exports.newProduct = catchAsyncErrors(async (req, res, next) => {
 
     let imagesLinks = [];
 
-    for (let i = 0; i < images.length; i++) {
-        const result = await cloudinary.v2.uploader.upload(images[i], {
+    for (const element of images) {
+        const result = await cloudinary.v2.uploader.upload(element, {
             folder: 'products'
         });
 
@@ -115,14 +115,14 @@ exports.updateProduct = catchAsyncErrors(async (req, res, next) => {
     if (images !== undefined) {
 
         // Deleting images associated with the product
-        for (let i = 0; i < product.images.length; i++) {
-            const result = await cloudinary.v2.uploader.destroy(product.images[i].public_id)
+        for (const element of product.images) {
+            const result = await cloudinary.v2.uploader.destroy(element.public_id)
         }
 
         let imagesLinks = [];
 
-        for (let i = 0; i < images.length; i++) {
-            const result = await cloudinary.v2.uploader.upload(images[i], {
+        for (const element of images) {
+            const result = await cloudinary.v2.uploader.upload(element, {
                 folder: 'products'
             });
 
@@ -161,8 +161,8 @@ exports.deleteProduct = catchAsyncErrors(async (req, res, next) => {
     }
 
     // Deleting images associated with the product
-    for (let i = 0; i < product.images.length; i++) {
-        const result = await cloudinary.v2.uploader.destroy(product.images[i].public_id)
+    for (const element of product.images) {
+        const result = await cloudinary.v2.uploader.destroy(element.public_id)
     }
 
     await product.remove();
