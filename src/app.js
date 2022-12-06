@@ -25,6 +25,7 @@ const auth = require('./routes/auth');
 const payment = require('./routes/payment');
 const order = require('./routes/order');
 const category = require('./routes/category');
+const cart = require('./routes/cart');
 
 
 app.use('/api/v1', products)
@@ -32,6 +33,7 @@ app.use('/api/v1', auth)
 app.use('/api/v1', payment)
 app.use('/api/v1', order)
 app.use('/api/v1', category)
+app.use('/api/v1', cart)
 
 if (process.env.NODE_ENV === 'PRODUCTION') {
     app.use(express.static(path.join(__dirname, '../frontend/build')))

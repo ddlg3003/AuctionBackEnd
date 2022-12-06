@@ -7,7 +7,19 @@ const productSchema = new mongoose.Schema({
     trim: true,
     maxLength: [100, "Product name cannot exceed 100 characters"],
   },
-  price: {
+  minPrice: {
+    type: Number,
+    required: [true, "Please enter product min price"],
+    maxLength: [5, "Product name cannot exceed 5 characters"],
+    default: 0.0,
+  },
+  step: {
+    type: Number,
+    required: [true, "Please enter product step"],
+    maxLength: [5, "Product name cannot exceed 5 characters"],
+    default: 0.0,
+  },
+  currentPrice: {
     type: Number,
     required: [true, "Please enter product price"],
     maxLength: [5, "Product name cannot exceed 5 characters"],
@@ -34,17 +46,8 @@ const productSchema = new mongoose.Schema({
     },
   ],
   category: {
-    // type: String,
-    // required: [true, "Please select category for this product"],
-    // enum: {
-    //   values: [
-
-    //   ],
-    //   message: "Please select correct category for product",
-    // },
-    type: mongoose.Schema.ObjectId,
-    ref: "Category",
-    required: true,
+    type: String,
+    required: [true, "Please select category for this product"],
   },
   seller: {
     type: String,
@@ -89,6 +92,10 @@ const productSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now,
+  },
+  time: {
+    type: Date,
+    required: [true, "Please enter product name"],
   },
 });
 
