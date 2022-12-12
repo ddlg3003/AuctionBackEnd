@@ -4,19 +4,19 @@ const router = express.Router();
 const {
     getProducts,
     getAdminProducts,
+    getTop5Products,
     newProduct,
     getSingleProduct,
     updateProduct,
     deleteProduct,
     createProductReview,
     getProductReviews,
-    deleteReview
-
+    deleteReview,
 } = require('../controllers/productController')
 
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
 
-
+router.route("/products/top5").get(getTop5Products);
 router.route('/products').get(getProducts);
 router.route('/admin/products').get(getAdminProducts);
 router.route('/product/:id').get(getSingleProduct);
