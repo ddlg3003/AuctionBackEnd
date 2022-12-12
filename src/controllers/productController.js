@@ -39,11 +39,64 @@ exports.newProduct = catchAsyncErrors(async (req, res, next) => {
     })
 })
 
-
 // Get all products   =>   /api/v1/products?keyword=apple
 exports.getProducts = catchAsyncErrors(async (req, res, next) => {
 
-    const resPerPage = 4;
+    const resPerPage = 9;
+    const productsCount = await Product.countDocuments();
+
+    const apiFeatures = new APIFeatures(Product.find(), req.query)
+        .search()
+        .filter()
+
+    let products = await apiFeatures.query;
+    let filteredProductsCount = products.length;
+
+    apiFeatures.pagination(resPerPage)
+    products = await apiFeatures.query;
+
+
+    res.status(200).json({
+        success: true,
+        productsCount,
+        resPerPage,
+        filteredProductsCount,
+        products
+    })
+
+})
+
+// Get products carousel exploring    =>   /api/v1/products?keyword=apple
+exports.getProductCarouselExploring = catchAsyncErrors(async (req, res, next) => {
+
+    const resPerPage = 9;
+    const productsCount = await Product.countDocuments();
+
+    const apiFeatures = new APIFeatures(Product.find(), req.query)
+        .search()
+        .filter()
+
+    let products = await apiFeatures.query;
+    let filteredProductsCount = products.length;
+
+    apiFeatures.pagination(resPerPage)
+    products = await apiFeatures.query;
+
+
+    res.status(200).json({
+        success: true,
+        productsCount,
+        resPerPage,
+        filteredProductsCount,
+        products
+    })
+
+})
+
+// Get products carousel live auction    =>   /api/v1/products?keyword=apple
+exports.getProductCarouselLiveAuction = catchAsyncErrors(async (req, res, next) => {
+
+    const resPerPage = 9;
     const productsCount = await Product.countDocuments();
 
     const apiFeatures = new APIFeatures(Product.find(), req.query)
