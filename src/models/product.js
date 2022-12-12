@@ -98,10 +98,6 @@ const productSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  startTime: {
-    type: Date,
-    required: [true, "Please enter product start time"],
-  },
   endTime: {
     type: Date,
     required: [true, "Please enter product end time"],
