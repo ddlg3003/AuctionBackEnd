@@ -21,40 +21,15 @@ exports.newProduct = catchAsyncErrors(async (req, res, next) => {
       folder: "products",
     });
 
-<<<<<<< HEAD
-    let images = []
-    if (typeof req.body.images === 'string') {
-        images.push(req.body.images)
-    } else {
-        images = req.body.images
-    }
-
-    let imagesLinks = [];
-
-    for (const element of images) {
-        const result = await cloudinary.v2.uploader.upload(element, {
-            folder: 'products'
-        });
-
-        imagesLinks.push({
-            public_id: result.public_id,
-            url: result.secure_url
-        })
-    }
-
-    req.body.images = imagesLinks
-    req.body.user = req.user.id;
-    req.body.currentPrice = req.body.minPrice;
-=======
     imagesLinks.push({
       public_id: result.public_id,
       url: result.secure_url,
     });
   }
->>>>>>> 3761b130924cc02dd91f5d4fc320233122e1e625
 
   req.body.images = imagesLinks;
   req.body.user = req.user.id;
+  req.body.currentPrice = req.body.minPrice;
 
   const product = await Product.create(req.body);
 
