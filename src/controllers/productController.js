@@ -44,7 +44,7 @@ exports.getProducts = catchAsyncErrors(async (req, res, next) => {
   const resPerPage = 9;
   const productsCount = await Product.countDocuments();
 
-  const apiFeatures = new APIFeatures(Product.find(), req.query)
+  const apiFeatures = new APIFeatures(Product, req.query)
     .search()
     .filter();
 
@@ -78,8 +78,8 @@ exports.getTop5Products = catchAsyncErrors(async (req, res, next) => {
 });
 
 // Get all products (Admin)  =>   /api/v1/admin/products
-exports.getAdminProducts = catchAsyncErrors(async (req, res, next) => {
-  const products = await Product.find();
+exports.getUserProducts = catchAsyncErrors(async (req, res, next) => {
+  const products = await Product.find({ user: req.user.id });
 
   res.status(200).json({
     success: true,
@@ -107,6 +107,10 @@ exports.updateProduct = catchAsyncErrors(async (req, res, next) => {
 
   if (!product) {
     return next(new ErrorHandler("Product not found", 404));
+  }
+
+  if(req.user.id !== product.user.toString() && req.user.role !== 'admin') {
+    return next(new ErrorHandler("You are not authorized to make change to this product", 401));
   }
 
   let images = [];
@@ -156,6 +160,10 @@ exports.deleteProduct = catchAsyncErrors(async (req, res, next) => {
 
   if (!product) {
     return next(new ErrorHandler("Product not found", 404));
+  }
+
+  if(req.user.id !== product.user.toString() && req.user.role !== 'admin') {
+    return next(new ErrorHandler("You are not authorized to make change to this product", 401));
   }
 
   // Deleting images associated with the product
