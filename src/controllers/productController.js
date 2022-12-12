@@ -30,6 +30,7 @@ exports.newProduct = catchAsyncErrors(async (req, res, next) => {
 
     req.body.images = imagesLinks
     req.body.user = req.user.id;
+    req.body.currentPrice = req.body.minPrice;
 
     const product = await Product.create(req.body);
 

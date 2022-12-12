@@ -11,19 +11,19 @@ const productSchema = new mongoose.Schema({
     type: Number,
     required: [true, "Please enter product min price"],
     maxLength: [5, "Product name cannot exceed 5 characters"],
-    default: 0.0,
+    default: 0,
   },
   step: {
     type: Number,
     required: [true, "Please enter product step"],
     maxLength: [5, "Product name cannot exceed 5 characters"],
-    default: 0.0,
+    default: 0,
   },
   currentPrice: {
     type: Number,
-    required: [true, "Please enter product price"],
+    // required: [true, "Please enter product price"],
     maxLength: [5, "Product name cannot exceed 5 characters"],
-    default: 0.0,
+    default: 0,
   },
   description: {
     type: String,
@@ -46,19 +46,20 @@ const productSchema = new mongoose.Schema({
     },
   ],
   category: {
-    type: String,
-    required: [true, "Please select category for this product"],
+    type: mongoose.Schema.ObjectId,
+    ref: "Category",
+    required: true,
   },
   seller: {
     type: String,
     required: [true, "Please enter product seller"],
   },
-  stock: {
-    type: Number,
-    required: [true, "Please enter product stock"],
-    maxLength: [5, "Product name cannot exceed 5 characters"],
-    default: 0,
-  },
+  // stock: {
+  //   type: Number,
+  //   required: [true, "Please enter product stock"],
+  //   maxLength: [5, "Product name cannot exceed 5 characters"],
+  //   default: 0,
+  // },
   numOfReviews: {
     type: Number,
     default: 0,
@@ -93,9 +94,13 @@ const productSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  time: {
+  startTime: {
     type: Date,
-    required: [true, "Please enter product name"],
+    required: [true, "Please enter product start time"],
+  },
+  endTime: {
+    type: Date,
+    required: [true, "Please enter product end time"],
   },
 });
 
