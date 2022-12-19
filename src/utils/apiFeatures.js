@@ -1,7 +1,8 @@
 class APIFeatures {
-    constructor(query, queryStr) {
+    constructor(query, queryStr, populate) {
         this.query = query;
         this.queryStr = queryStr;
+        this.populate = populate;
     }
 
     search() {
@@ -28,11 +29,15 @@ class APIFeatures {
         let queryStr = JSON.stringify(queryCopy)
         queryStr = queryStr.replace(/\b(gt|gte|lt|lte)\b/g, match => `$${match}`)
 
-        this.query = this.query.find(JSON.parse(queryStr));
+        this.query = this.query.find(JSON.parse(queryStr)).select('name description endTime currentPrice images');;
 
         // Sort fields
         if(this.queryStr.sort && this.queryStr.sort === 'true') {
             this.query = this.query.sort('endTime');
+        }
+
+        if(this.populate) {
+            this.query = this.query.populate(this.populate);
         }
 
         return this;
