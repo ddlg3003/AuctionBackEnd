@@ -155,7 +155,9 @@ exports.updateProduct = catchAsyncErrors(async (req, res, next) => {
     req.body.images = imagesLinks;
   }
 
-  product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+  const { bidPrice, auctionLogs, priceHolder, ratings, reviews, ...updatedData } = req.body;
+
+  product = await Product.findByIdAndUpdate(req.params.id, updatedData, {
     new: true,
     runValidators: true,
     useFindAndModify: false,
