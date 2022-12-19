@@ -174,9 +174,9 @@ exports.bidProduct = catchAsyncErrors(async (req, res, next) => {
 
   // Check if expired time or not
   if (product.endTime - Date.now() > 0) {
-    // Check if bid price is a positive number and bid >= current price + step
+    // Check if bid price is a positive interger number and bid >= current price + step
     if (
-      Number.isInteger(bidPrice) &&
+      parseInt(bidPrice) &&
       bidPrice > 0 &&
       bidPrice >= product.currentPrice + product.step
     ) {
