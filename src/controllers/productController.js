@@ -210,7 +210,7 @@ exports.bidProduct = catchAsyncErrors(async (req, res, next) => {
         message,
       });
     } else {
-      return next(new ErrorHandler('Bidding price must bigger than current price + step', 400));
+      return next(new ErrorHandler('Bidding price be must bigger than current price + step', 400));
     }
   } else {
     return next(new ErrorHandler('This product has been expired', 400));
