@@ -21,7 +21,7 @@ exports.newCategory = catchAsyncErrors(async (req, res, next) => {
 // Get all categories   =>   /api/v1/categories
 exports.getCategories = catchAsyncErrors(async (req, res, next) => {
   try {
-    const resPerPage = 4;
+    const resPerPage = 1000;
     const categoriesCount = await Category.countDocuments();
 
     const apiFeatures = new APIFeatures(Category.find(), req.query)
