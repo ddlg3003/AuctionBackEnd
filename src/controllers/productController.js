@@ -1,14 +1,15 @@
-const Product = require("../models/product");
+const Product = require('../models/product');
 
-const ErrorHandler = require("../utils/errorHandler");
-const catchAsyncErrors = require("../middlewares/catchAsyncErrors");
-const APIFeatures = require("../utils/apiFeatures");
-const cloudinary = require("cloudinary");
+const ErrorHandler = require('../utils/errorHandler');
+const catchAsyncErrors = require('../middlewares/catchAsyncErrors');
+const APIFeatures = require('../utils/apiFeatures');
+const cloudinary = require('cloudinary');
+const sendMail = require('../utils/sendEmail');
 
 // Create new product   =>   /api/v1/admin/product/new
 exports.newProduct = catchAsyncErrors(async (req, res, next) => {
   let images = [];
-  if (typeof req.body.images === "string") {
+  if (typeof req.body.images === 'string') {
     images.push(req.body.images);
   } else {
     images = req.body.images;
@@ -18,7 +19,7 @@ exports.newProduct = catchAsyncErrors(async (req, res, next) => {
 
   for (const element of images) {
     const result = await cloudinary.v2.uploader.upload(element, {
-      folder: "products",
+      folder: 'products',
     });
 
     imagesLinks.push({
@@ -91,10 +92,10 @@ exports.getUserProducts = catchAsyncErrors(async (req, res, next) => {
 
 // Get single product details   =>   /api/v1/product/:id
 exports.getSingleProduct = catchAsyncErrors(async (req, res, next) => {
-  const product = await Product.findById(req.params.id);
+  const product = await Product.findById(req.params.id).populate('priceHolder', 'lastName firstName');
 
   if (!product) {
-    return next(new ErrorHandler("Product not found", 404));
+    return next(new ErrorHandler('Product not found', 404));
   }
 
   res.status(200).json({
@@ -108,20 +109,20 @@ exports.updateProduct = catchAsyncErrors(async (req, res, next) => {
   let product = await Product.findById(req.params.id);
 
   if (!product) {
-    return next(new ErrorHandler("Product not found", 404));
+    return next(new ErrorHandler('Product not found', 404));
   }
 
-  if (req.user.id !== product.user.toString() && req.user.role !== "admin") {
+  if (req.user.id !== product.user.toString() && req.user.role !== 'admin') {
     return next(
       new ErrorHandler(
-        "You are not authorized to make change to this product",
+        'You are not authorized to make change to this product',
         401
       )
     );
   }
 
   let images = [];
-  if (typeof req.body.images === "string") {
+  if (typeof req.body.images === 'string') {
     images.push(req.body.images);
   } else {
     images = req.body.images;
@@ -137,7 +138,7 @@ exports.updateProduct = catchAsyncErrors(async (req, res, next) => {
 
     for (const element of images) {
       const result = await cloudinary.v2.uploader.upload(element, {
-        folder: "products",
+        folder: 'products',
       });
 
       imagesLinks.push({
@@ -161,18 +162,81 @@ exports.updateProduct = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
+// Bid price for a product   =>   /api/v1/product/:id/bid
+exports.bidProduct = catchAsyncErrors(async (req, res, next) => {
+  let product = await Product.findById(req.params.id);
+
+  if (!product) {
+    return next(new ErrorHandler('Product not found', 404));
+  }
+
+  const { bidPrice } = req.body;
+
+  // Check if expired time or not
+  if (product.endTime - Date.now() > 0) {
+    // Check if bid price is a positive number and bid >= current price + step
+    if (
+      Number.isInteger(bidPrice) &&
+      bidPrice > 0 &&
+      bidPrice >= product.currentPrice + product.step
+    ) {
+      const auctionLog = {
+        user: req.user._id,
+        bidPrice,
+      };
+      // Update product
+      product = await Product.findByIdAndUpdate(
+        req.params.id,
+        {
+          currentPrice: bidPrice,
+          priceHolder: req.user._id,
+          auctionLogs: [...product.auctionLogs, auctionLog],
+        },
+        {
+          new: true,
+          runValidators: true,
+          useFindAndModify: false,
+        }
+      );
+
+      const message = `
+        <div>
+          You've bid $${bidPrice} for ${product.name}. 
+          See detail at: ${process.env.FRONTEND_URL}/products/${req.params.id}
+        </div>
+      `;
+
+      // Send mail to user by using sendGrid
+      await sendMail({
+        email: req.user.email,
+        subject: `CDC Auction Bidding Notification for ${product.name}`,
+        message,
+      });
+    } else {
+      return next(new ErrorHandler('Bidding price must be a positive number and bigger than current price + step', 400));
+    }
+  } else {
+    return next(new ErrorHandler('This product has been expired', 400));
+  }
+
+  res.status(200).json({
+    success: true,
+    product,
+  });
+});
+
 // Delete Product   =>   /api/v1/admin/product/:id
 exports.deleteProduct = catchAsyncErrors(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
 
   if (!product) {
-    return next(new ErrorHandler("Product not found", 404));
+    return next(new ErrorHandler('Product not found', 404));
   }
 
-  if (req.user.id !== product.user.toString() && req.user.role !== "admin") {
+  if (req.user.id !== product.user.toString() && req.user.role !== 'admin') {
     return next(
       new ErrorHandler(
-        "You are not authorized to make change to this product",
+        'You are not authorized to make change to this product',
         401
       )
     );
@@ -187,7 +251,7 @@ exports.deleteProduct = catchAsyncErrors(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: "Product is deleted.",
+    message: 'Product is deleted.',
   });
 });
 

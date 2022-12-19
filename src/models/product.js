@@ -94,6 +94,11 @@ const productSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+  priceHolder: {
+    type: mongoose.Schema.ObjectId,
+    ref: "User",
+    default: null,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -102,6 +107,23 @@ const productSchema = new mongoose.Schema({
     type: Date,
     required: [true, "Please enter product end time"],
   },
+  auctionLogs: [
+    {
+      auctionAt: {
+        type: Date,
+        default: Date.now,
+      },
+      user: {
+        type: mongoose.Schema.ObjectId,
+        ref: "User",
+        required: true,
+      },
+      bidPrice: {
+        type: Number,
+        required: true,
+      }
+    }
+  ]
 });
 
 module.exports = mongoose.model("Product", productSchema);
