@@ -175,11 +175,7 @@ exports.bidProduct = catchAsyncErrors(async (req, res, next) => {
   // Check if expired time or not
   if (product.endTime - Date.now() > 0) {
     // Check if bid price is a positive interger number and bid >= current price + step
-    if (
-      parseInt(bidPrice) &&
-      bidPrice > 0 &&
-      bidPrice >= product.currentPrice + product.step
-    ) {
+    if(parseInt(bidPrice) > 0 && bidPrice >= product.currentPrice + product.step) {
       const auctionLog = {
         user: req.user._id,
         bidPrice,
