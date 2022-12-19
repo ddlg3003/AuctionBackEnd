@@ -176,7 +176,7 @@ exports.bidProduct = catchAsyncErrors(async (req, res, next) => {
   if (product.endTime - Date.now() > 0) {
     // Check if bid price is a positive interger number and bid >= current price + step
     // Js auto convert string to number because absolute comparing
-    if(bidPrice > 0 && bidPrice >= product.currentPrice + product.step) {
+    if(bidPrice >= product.currentPrice + product.step) {
       const auctionLog = {
         user: req.user._id,
         bidPrice,
@@ -210,7 +210,7 @@ exports.bidProduct = catchAsyncErrors(async (req, res, next) => {
         message,
       });
     } else {
-      return next(new ErrorHandler('Bidding price must be a positive number and bigger than current price + step', 400));
+      return next(new ErrorHandler('Bidding price must bigger than current price + step', 400));
     }
   } else {
     return next(new ErrorHandler('This product has been expired', 400));
