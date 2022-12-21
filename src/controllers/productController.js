@@ -1,44 +1,73 @@
-const Product = require('../models/product');
+const Product = require("../models/product");
 
-const ErrorHandler = require('../utils/errorHandler');
-const catchAsyncErrors = require('../middlewares/catchAsyncErrors');
-const APIFeatures = require('../utils/apiFeatures');
-const cloudinary = require('cloudinary');
-const sendMail = require('../utils/sendEmail');
+const ErrorHandler = require("../utils/errorHandler");
+const catchAsyncErrors = require("../middlewares/catchAsyncErrors");
+const APIFeatures = require("../utils/apiFeatures");
+const cloudinary = require("cloudinary");
+const sendMail = require("../utils/sendEmail");
+
+const { v4: uuidv4 } = require("uuid");
+
+const stripe = require("stripe")(
+  "sk_test_51LhTmHDGOQhsYLL1dxbYltJBxcq96DTxh5fTdfeIqSWTIOfOjpNAghkiYRmRNN9RZSgRNWxs3zPobzElvJNfbj5M002diHFCr2"
+);
 
 // Create new product   =>   /api/v1/admin/product/new
 exports.newProduct = catchAsyncErrors(async (req, res, next) => {
-  let images = [];
-  if (typeof req.body.images === 'string') {
-    images.push(req.body.images);
-  } else {
-    images = req.body.images;
-  }
-
-  let imagesLinks = [];
-
-  for (const element of images) {
-    const result = await cloudinary.v2.uploader.upload(element, {
-      folder: 'products',
-    });
-
-    imagesLinks.push({
-      public_id: result.public_id,
-      url: result.secure_url,
-    });
-  }
-
-  req.body.images = imagesLinks;
-  req.body.user = req.user.id;
-  req.body.currentPrice = req.body.minPrice;
-  req.body.seller = req.user.name;
-
-  const product = await Product.create(req.body);
-
-  res.status(201).json({
-    success: true,
-    product,
+  const customer = await stripe.customers.create({
+    email: req.body.token.email,
+    source: req.body.token.id,
   });
+
+  const payment = await stripe.charges.create(
+    {
+      amount: req.body.minPrice * 0.02 * 100,
+      customer: customer.id,
+      currency: "USD",
+      receipt_email: req.body.token.email,
+    },
+    {
+      idempotencyKey: uuidv4(),
+    }
+  );
+
+  console.log(payment);
+
+  if (payment) {
+    let images = [];
+    if (typeof req.body.images === "string") {
+      images.push(req.body.images);
+    } else {
+      images = req.body.images;
+    }
+
+    let imagesLinks = [];
+
+    for (const element of images) {
+      const result = await cloudinary.v2.uploader.upload(element, {
+        folder: "products",
+      });
+
+      imagesLinks.push({
+        public_id: result.public_id,
+        url: result.secure_url,
+      });
+    }
+
+    req.body.images = imagesLinks;
+    req.body.user = req.user.id;
+    req.body.currentPrice = req.body.minPrice;
+    req.body.seller = req.user.name;
+
+    const product = await Product.create(req.body);
+
+    res.status(201).json({
+      success: true,
+      product,
+    });
+  } else {
+    return next(new ErrorHandler("Plesae purchase first", 400));
+  }
 });
 
 // Get all products   =>   /api/v1/products?keyword=apple
@@ -46,9 +75,7 @@ exports.getProducts = catchAsyncErrors(async (req, res, next) => {
   const resPerPage = parseInt(req.query.limit);
   const productsCount = await Product.countDocuments();
 
-  const apiFeatures = new APIFeatures(Product, req.query)
-    .search()
-    .filter();
+  const apiFeatures = new APIFeatures(Product, req.query).search().filter();
 
   let products = await apiFeatures.query;
   let filteredProductsCount = products.length;
@@ -95,12 +122,12 @@ exports.getUserProducts = catchAsyncErrors(async (req, res, next) => {
 // Get single product details   =>   /api/v1/product/:id
 exports.getSingleProduct = catchAsyncErrors(async (req, res, next) => {
   const product = await Product.findById(req.params.id).populate(
-    'priceHolder',
-    'lastName firstName'
+    "priceHolder",
+    "lastName firstName"
   );
 
   if (!product) {
-    return next(new ErrorHandler('Product not found', 404));
+    return next(new ErrorHandler("Product not found", 404));
   }
 
   res.status(200).json({
@@ -114,20 +141,20 @@ exports.updateProduct = catchAsyncErrors(async (req, res, next) => {
   let product = await Product.findById(req.params.id);
 
   if (!product) {
-    return next(new ErrorHandler('Product not found', 404));
+    return next(new ErrorHandler("Product not found", 404));
   }
 
-  if (req.user.id !== product.user.toString() && req.user.role !== 'admin') {
+  if (req.user.id !== product.user.toString() && req.user.role !== "admin") {
     return next(
       new ErrorHandler(
-        'You are not authorized to make change to this product',
+        "You are not authorized to make change to this product",
         401
       )
     );
   }
 
   let images = [];
-  if (typeof req.body.images === 'string') {
+  if (typeof req.body.images === "string") {
     images.push(req.body.images);
   } else {
     images = req.body.images;
@@ -143,7 +170,7 @@ exports.updateProduct = catchAsyncErrors(async (req, res, next) => {
 
     for (const element of images) {
       const result = await cloudinary.v2.uploader.upload(element, {
-        folder: 'products',
+        folder: "products",
       });
 
       imagesLinks.push({
@@ -155,7 +182,14 @@ exports.updateProduct = catchAsyncErrors(async (req, res, next) => {
     req.body.images = imagesLinks;
   }
 
-  const { currentPrice, auctionLogs, priceHolder, ratings, reviews, ...updatedData } = req.body;
+  const {
+    currentPrice,
+    auctionLogs,
+    priceHolder,
+    ratings,
+    reviews,
+    ...updatedData
+  } = req.body;
 
   product = await Product.findByIdAndUpdate(req.params.id, updatedData, {
     new: true,
@@ -174,7 +208,7 @@ exports.bidProduct = catchAsyncErrors(async (req, res, next) => {
   let product = await Product.findById(req.params.id);
 
   if (!product) {
-    return next(new ErrorHandler('Product not found', 404));
+    return next(new ErrorHandler("Product not found", 404));
   }
 
   const { bidPrice } = req.body;
@@ -211,21 +245,21 @@ exports.bidProduct = catchAsyncErrors(async (req, res, next) => {
       `;
 
       // Send mail to user by using sendGrid
-      await sendMail({
-        email: req.user.email,
-        subject: `CDC Auction Bidding Notification for ${product.name}`,
-        message,
-      });
+      // await sendMail({
+      //   email: req.user.email,
+      //   subject: `CDC Auction Bidding Notification for ${product.name}`,
+      //   message,
+      // });
     } else {
       return next(
         new ErrorHandler(
-          'Bidding price must be bigger than current price + step',
+          "Bidding price must be bigger than current price + step",
           400
         )
       );
     }
   } else {
-    return next(new ErrorHandler('This product has been expired', 400));
+    return next(new ErrorHandler("This product has been expired", 400));
   }
 
   res.status(200).json({
@@ -239,13 +273,13 @@ exports.deleteProduct = catchAsyncErrors(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
 
   if (!product) {
-    return next(new ErrorHandler('Product not found', 404));
+    return next(new ErrorHandler("Product not found", 404));
   }
 
-  if (req.user.id !== product.user.toString() && req.user.role !== 'admin') {
+  if (req.user.id !== product.user.toString() && req.user.role !== "admin") {
     return next(
       new ErrorHandler(
-        'You are not authorized to make change to this product',
+        "You are not authorized to make change to this product",
         401
       )
     );
@@ -260,7 +294,7 @@ exports.deleteProduct = catchAsyncErrors(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: 'Product is deleted.',
+    message: "Product is deleted.",
   });
 });
 
