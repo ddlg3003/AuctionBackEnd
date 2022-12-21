@@ -134,7 +134,6 @@ exports.resetPassword = catchAsyncErrors(async (req, res, next) => {
 
 })
 
-
 // Get currently logged in user details   =>   /api/v1/me
 exports.getUserProfile = catchAsyncErrors(async (req, res, next) => {
     const user = await User.findById(req.user.id);
@@ -144,7 +143,6 @@ exports.getUserProfile = catchAsyncErrors(async (req, res, next) => {
         user
     })
 })
-
 
 // Update / Change password   =>  /api/v1/password/update
 exports.updatePassword = catchAsyncErrors(async (req, res, next) => {

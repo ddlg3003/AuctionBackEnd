@@ -34,27 +34,45 @@ exports.newProduct = catchAsyncErrors(async (req, res, next) => {
   console.log(payment);
 
   if (payment) {
-    let images = [];
-    if (typeof req.body.images === "string") {
-      images.push(req.body.images);
-    } else {
-      images = req.body.images;
-    }
+    const mainImgResult = await cloudinary.v2.uploader.upload(req.body.mainImage, {
+      folder: "products",
+    });
 
-    let imagesLinks = [];
+    req.body.mainImage = {
+      public_id: mainImgResult.public_id,
+      url: mainImgResult.secure_url,
+    };
 
-    for (const element of images) {
-      const result = await cloudinary.v2.uploader.upload(element, {
-        folder: "products",
-      });
+    // Upload sub image 1
+    const subImg1Result = await cloudinary.v2.uploader.upload(req.body.subImage1, {
+      folder: "products",
+    });
 
-      imagesLinks.push({
-        public_id: result.public_id,
-        url: result.secure_url,
-      });
-    }
+    req.body.subImage1 = {
+      public_id: subImg1Result.public_id,
+      url: subImg1Result.secure_url,
+    };
 
-    req.body.images = imagesLinks;
+    // Upload sub image 2
+    const subImg2Result = await cloudinary.v2.uploader.upload(req.body.subImage2, {
+      folder: "products",
+    });
+
+    req.body.subImage2 = {
+      public_id: subImg2Result.public_id,
+      url: subImg2Result.secure_url,
+    };
+
+    // Upload sub image 3
+    const subImg3Result = await cloudinary.v2.uploader.upload(req.body.subImage3, {
+      folder: "products",
+    });
+
+    req.body.subImage3 = {
+      public_id: subImg3Result.public_id,
+      url: subImg3Result.secure_url,
+    };
+
     req.body.user = req.user.id;
     req.body.currentPrice = req.body.minPrice;
     req.body.seller = req.user.name;
