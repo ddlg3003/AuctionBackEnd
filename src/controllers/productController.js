@@ -211,11 +211,11 @@ exports.bidProduct = catchAsyncErrors(async (req, res, next) => {
       `;
 
       // Send mail to user by using sendGrid
-      await sendMail({
-        email: req.user.email,
-        subject: `CDC Auction Bidding Notification for ${product.name}`,
-        message,
-      });
+      // await sendMail({
+      //   email: req.user.email,
+      //   subject: `CDC Auction Bidding Notification for ${product.name}`,
+      //   message,
+      // });
     } else {
       return next(
         new ErrorHandler(
