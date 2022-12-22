@@ -127,9 +127,18 @@ exports.getTop5Products = catchAsyncErrors(async (req, res, next) => {
   //   }
 });
 
-// Get all products (Admin)  =>   /api/v1/admin/products
+// Get my products =>   /api/v1/products/by-user
 exports.getUserProducts = catchAsyncErrors(async (req, res, next) => {
   const products = await Product.find({ user: req.user.id });
+
+  res.status(200).json({
+    success: true,
+    products,
+  });
+});
+
+exports.getWonProducts = catchAsyncErrors(async (req, res, next) => {
+  const products = await Product.find({ priceHolder: req.user.id, endTime: { $lte: Date.now() } });
 
   res.status(200).json({
     success: true,
