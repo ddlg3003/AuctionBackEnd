@@ -27,15 +27,15 @@ const userSchema = new mongoose.Schema({
     minlength: [6, "Your password must be longer than 6 characters"],
     select: false,
   },
-  avatar: {
-    public_id: {
-      type: String,
-      // required: true,
-    },
-    url: {
-      type: String,
-      // required: true,
-    },
+  address: {
+    type: String,
+    required: [false],
+    maxLength: [1000],
+  },
+  phoneNumber: {
+    type: String,
+    required: [false],
+    maxLength: [10],
   },
   role: {
     type: String,
