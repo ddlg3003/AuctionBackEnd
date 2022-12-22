@@ -10,13 +10,12 @@ const {
 
 const { isAuthenticatedUser, authorizeRoles } = require("../middlewares/auth");
 
-router.route("/carts").get(getCarts);
-
-router.route("/admin/cart/new").post(isAuthenticatedUser, newCart);
-
 router
-  .route("/cart/:id")
-  .put(isAuthenticatedUser, updateCart)
-  .delete(isAuthenticatedUser, deleteCart);
+  .route("/carts")
+  .get(isAuthenticatedUser, authorizeRoles("admin", "user"), getCarts);
+
+router.route("/cart/new").post(isAuthenticatedUser, newCart);
+
+router.route("/cart").delete(isAuthenticatedUser, deleteCart);
 
 module.exports = router;

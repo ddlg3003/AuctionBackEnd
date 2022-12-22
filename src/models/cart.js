@@ -5,12 +5,8 @@ const cartSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  quantity: {
-    type: Number,
-    required: true,
-  },
   image: {
-    type: String,
+    type: Object,
     required: true,
   },
   price: {

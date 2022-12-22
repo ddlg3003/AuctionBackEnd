@@ -14,25 +14,15 @@ exports.newCart = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-// Get all carts   =>   /api/v1/cart/:userid
+// Get cart   =>   /api/v1/cart/
 exports.getCarts = catchAsyncErrors(async (req, res, next) => {
   try {
-    const resPerPage = 4;
-    const cartsCount = await Cart.countDocuments();
+    const apiFeatures = await Cart.find({}).select("user");
 
-    const apiFeatures = new APIFeatures(Cart.find({}).select("user"), req.query)
-
-    let carts = await apiFeatures.query;
-    let filteredCartsCount = carts.length;
-
-    apiFeatures.pagination(resPerPage);
-    carts = await apiFeatures.query;
+    const carts = await apiFeatures.query;
 
     res.status(200).json({
       success: true,
-      cartsCount,
-      resPerPage,
-      filteredCartsCount,
       carts,
     });
   } catch (error) {
