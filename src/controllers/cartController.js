@@ -6,7 +6,13 @@ const APIFeatures = require("../utils/apiFeatures");
 
 // Add to cart  =>   /api/v1/cart/new
 exports.newCart = catchAsyncErrors(async (req, res, next) => {
-  const cart = await Cart.create(req.body);
+  let cart = await Cart.findOne({ user: req.user._id, product: req.body.product });
+    
+  if(cart) {
+    return next(new ErrorHandler("This product is already in cart", 400));
+  }
+
+  cart = await Cart.create(req.body);
 
   res.status(200).json({
     success: true,
@@ -17,9 +23,9 @@ exports.newCart = catchAsyncErrors(async (req, res, next) => {
 // Get cart   =>   /api/v1/cart/
 exports.getCarts = catchAsyncErrors(async (req, res, next) => {
   try {
-    const apiFeatures = await Cart.find({}).select("user");
+    const carts = await Cart.find({ user: req.user._id });
 
-    const carts = await apiFeatures.query;
+    console.log(carts)
 
     res.status(200).json({
       success: true,
