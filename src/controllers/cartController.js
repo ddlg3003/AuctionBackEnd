@@ -25,8 +25,6 @@ exports.getCarts = catchAsyncErrors(async (req, res, next) => {
   try {
     const carts = await Cart.find({ user: req.user._id });
 
-    console.log(carts)
-
     res.status(200).json({
       success: true,
       carts,
@@ -36,20 +34,10 @@ exports.getCarts = catchAsyncErrors(async (req, res, next) => {
   }
 });
 
-// Update Cart   =>   /api/v1/admin/cart/:userid
-exports.updateCart = catchAsyncErrors(async (req, res, next) => {
+// Get cart by id   =>   /api/v1/cart/:id
+exports.getCartById = catchAsyncErrors(async (req, res, next) => {
   try {
-    let cart = await Cart.Cart.find({}).select("user");
-
-    if (!cart) {
-      return next(new ErrorHandler("Cart not found", 404));
-    }
-
-    cart = await Cart.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-      useFindAndModify: false,
-    });
+    const cart = await Cart.findById(req.params.id);
 
     res.status(200).json({
       success: true,
